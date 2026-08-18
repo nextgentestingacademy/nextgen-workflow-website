@@ -830,6 +830,84 @@ textarea {
   font-family: inherit;
 }
 
+#contact {
+  scroll-margin-top: 90px;
+}
+
+/* Contact Status Notification Banner at Top of Contact Section */
+.contact-status-banner {
+  display: none;
+  width: 100%;
+  padding: 1.15rem 1.4rem;
+  border-radius: var(--radius);
+  margin-bottom: 2.25rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+  animation: banner-slide-in 240ms ease;
+  outline: none;
+}
+
+@keyframes banner-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contact-status-banner.success {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: #f0fdf4;
+  color: #14532d;
+  border: 1px solid #86efac;
+}
+
+.contact-status-banner.error {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.contact-status-banner .banner-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.contact-status-banner.success .banner-icon {
+  background: #22c55e;
+  color: #ffffff;
+}
+
+.contact-status-banner.error .banner-icon {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.contact-status-banner .banner-text {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.contact-status-banner:focus-visible {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+}
+
 .form-alert {
   padding: 0.9rem 1.1rem;
   border-radius: var(--radius);

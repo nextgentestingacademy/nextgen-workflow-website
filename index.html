@@ -23,7 +23,7 @@
       document.documentElement.classList.add("js-enabled");
     </script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    <link rel="stylesheet" href="styles.css?v=1.3" />
+    <link rel="stylesheet" href="styles.css?v=1.4" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -314,112 +314,114 @@
       </section>
 
       <section class="section contact" id="contact" aria-labelledby="contact-title">
-        <div class="container contact-grid">
-          <div class="contact-info reveal">
-            <p class="eyebrow">Contact</p>
-            <h2 id="contact-title">Let's Discuss Your Workflow</h2>
-            <p class="contact-intro">
-              Tell us about a repetitive, manual or disconnected process. We'll help you identify where automation, integrations or intelligent workflows could create practical business value.
-            </p>
-            <div class="contact-methods" aria-label="Direct contact methods">
-              <div class="contact-method-item">
-                <div class="contact-icon" aria-hidden="true">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect width="20" height="16" x="2" y="4" rx="2"/>
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                  </svg>
+        <div class="container">
+          <!-- Submission Result Notification Banner at Top of Contact Section -->
+          <div class="contact-status-banner" id="contact-status-banner" role="status" aria-live="polite" tabindex="-1"></div>
+
+          <div class="contact-grid">
+            <div class="contact-info reveal">
+              <p class="eyebrow">Contact</p>
+              <h2 id="contact-title">Let's Discuss Your Workflow</h2>
+              <p class="contact-intro">
+                Tell us about a repetitive, manual or disconnected process. We'll help you identify where automation, integrations or intelligent workflows could create practical business value.
+              </p>
+              <div class="contact-methods" aria-label="Direct contact methods">
+                <div class="contact-method-item">
+                  <div class="contact-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="20" height="16" x="2" y="4" rx="2"/>
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                  </div>
+                  <div class="contact-details">
+                    <span class="contact-label">Email</span>
+                    <a class="contact-link" href="mailto:hello@nextgenworkflow.co">hello@nextgenworkflow.co</a>
+                  </div>
                 </div>
-                <div class="contact-details">
-                  <span class="contact-label">Email</span>
-                  <a class="contact-link" href="mailto:hello@nextgenworkflow.co">hello@nextgenworkflow.co</a>
+                <div class="contact-method-item">
+                  <div class="contact-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2ZM12.04 20.15C10.56 20.15 9.11 19.76 7.85 19.01L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.8 7.37 7.5 3.67 12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15ZM16.57 14.33C16.32 14.2 15.1 13.6 14.88 13.51C14.65 13.43 14.49 13.39 14.32 13.64C14.16 13.88 13.69 14.44 13.54 14.61C13.4 14.77 13.25 14.79 13 14.67C12.75 14.54 11.96 14.28 11.02 13.45C10.29 12.8 9.8 12 9.65 11.75C9.51 11.51 9.63 11.37 9.76 11.24C9.87 11.13 10.01 10.95 10.13 10.81C10.25 10.67 10.3 10.56 10.38 10.4C10.46 10.23 10.42 10.09 10.36 9.97C10.3 9.84 9.8 8.63 9.6 8.13C9.4 7.65 9.2 7.71 9.05 7.71C8.91 7.7 8.75 7.7 8.58 7.7C8.42 7.7 8.15 7.76 7.93 8.01C7.7 8.25 7.07 8.84 7.07 10.05C7.07 11.26 7.95 12.43 8.07 12.59C8.2 12.75 9.81 15.24 12.28 16.31C12.87 16.56 13.32 16.71 13.68 16.83C14.27 17.02 14.81 16.99 15.24 16.92C15.72 16.85 16.71 16.32 16.92 15.74C17.13 15.17 17.13 14.68 17.06 14.57C17 14.46 16.82 14.45 16.57 14.33Z"/>
+                    </svg>
+                  </div>
+                  <div class="contact-details">
+                    <span class="contact-label">WhatsApp</span>
+                    <a class="contact-link" href="https://wa.me/919821205094" target="_blank" rel="noopener noreferrer">+91 98212 05094</a>
+                  </div>
                 </div>
-              </div>
-              <div class="contact-method-item">
-                <div class="contact-icon" aria-hidden="true">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2ZM12.04 20.15C10.56 20.15 9.11 19.76 7.85 19.01L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.8 7.37 7.5 3.67 12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15ZM16.57 14.33C16.32 14.2 15.1 13.6 14.88 13.51C14.65 13.43 14.49 13.39 14.32 13.64C14.16 13.88 13.69 14.44 13.54 14.61C13.4 14.77 13.25 14.79 13 14.67C12.75 14.54 11.96 14.28 11.02 13.45C10.29 12.8 9.8 12 9.65 11.75C9.51 11.51 9.63 11.37 9.76 11.24C9.87 11.13 10.01 10.95 10.13 10.81C10.25 10.67 10.3 10.56 10.38 10.4C10.46 10.23 10.42 10.09 10.36 9.97C10.3 9.84 9.8 8.63 9.6 8.13C9.4 7.65 9.2 7.71 9.05 7.71C8.91 7.7 8.75 7.7 8.58 7.7C8.42 7.7 8.15 7.76 7.93 8.01C7.7 8.25 7.07 8.84 7.07 10.05C7.07 11.26 7.95 12.43 8.07 12.59C8.2 12.75 9.81 15.24 12.28 16.31C12.87 16.56 13.32 16.71 13.68 16.83C14.27 17.02 14.81 16.99 15.24 16.92C15.72 16.85 16.71 16.32 16.92 15.74C17.13 15.17 17.13 14.68 17.06 14.57C17 14.46 16.82 14.45 16.57 14.33Z"/>
-                  </svg>
-                </div>
-                <div class="contact-details">
-                  <span class="contact-label">WhatsApp</span>
-                  <a class="contact-link" href="https://wa.me/919821205094" target="_blank" rel="noopener noreferrer">+91 98212 05094</a>
-                </div>
-              </div>
-              <div class="contact-method-item">
-                <div class="contact-icon" aria-hidden="true">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.65 1.65 0 0 0-1.66 1.66 1.66 1.66 0 0 0 1.66 1.66 1.66 1.66 0 0 0 1.65-1.66 1.65 1.65 0 0 0-1.65-1.66"/>
-                  </svg>
-                </div>
-                <div class="contact-details">
-                  <span class="contact-label">LinkedIn</span>
-                  <a class="contact-link" href="https://www.linkedin.com/company/nextgen-workflow-automation/" target="_blank" rel="noopener noreferrer">NextGen Workflow Automation</a>
+                <div class="contact-method-item">
+                  <div class="contact-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.65 1.65 0 0 0-1.66 1.66 1.66 1.66 0 0 0 1.66 1.66 1.66 1.66 0 0 0 1.65-1.66 1.65 1.65 0 0 0-1.65-1.66"/>
+                    </svg>
+                  </div>
+                  <div class="contact-details">
+                    <span class="contact-label">LinkedIn</span>
+                    <a class="contact-link" href="https://www.linkedin.com/company/nextgen-workflow-automation/" target="_blank" rel="noopener noreferrer">NextGen Workflow Automation</a>
+                  </div>
                 </div>
               </div>
             </div>
+
+            <!-- Secure Lead Generation Form with Cloudflare Turnstile & Honeypot -->
+            <form class="contact-form reveal" id="lead-form" action="#" method="post" aria-labelledby="form-heading" novalidate>
+              <div class="form-header">
+                <h3 id="form-heading" class="form-title">Request a Workflow Discovery Session</h3>
+                <p class="form-subtitle">Tell us about the process you'd like to improve. We'll review your requirement and identify practical automation opportunities.</p>
+              </div>
+
+              <!-- Hidden Honeypot Anti-Spam Field (do not fill) -->
+              <div class="oh-honey" aria-hidden="true">
+                <label for="company_website">Company Website</label>
+                <input type="text" id="company_website" name="company_website" tabindex="-1" autocomplete="off" />
+              </div>
+
+              <div class="field">
+                <label for="name">Name <span class="required-indicator" aria-hidden="true">*</span></label>
+                <input id="name" name="name" type="text" placeholder="Your name" autocomplete="name" maxlength="80" required aria-describedby="name-error" />
+                <span class="field-error" id="name-error" role="alert" aria-live="polite"></span>
+              </div>
+
+              <div class="field">
+                <label for="company">Company <span class="required-indicator" aria-hidden="true">*</span></label>
+                <input id="company" name="company" type="text" placeholder="Company name" autocomplete="organization" maxlength="120" required aria-describedby="company-error" />
+                <span class="field-error" id="company-error" role="alert" aria-live="polite"></span>
+              </div>
+
+              <div class="field two-col">
+                <div>
+                  <label for="email">Business Email <span class="required-indicator" aria-hidden="true">*</span></label>
+                  <input id="email" name="email" type="email" placeholder="you@company.com" autocomplete="email" maxlength="254" required aria-describedby="email-error" />
+                  <span class="field-error" id="email-error" role="alert" aria-live="polite"></span>
+                </div>
+                <div>
+                  <label for="phone">Phone <span class="required-indicator" aria-hidden="true">*</span></label>
+                  <input id="phone" name="phone" type="tel" placeholder="+91 XXXXX XXXXX" autocomplete="tel" maxlength="25" required aria-describedby="phone-error" />
+                  <span class="field-error" id="phone-error" role="alert" aria-live="polite"></span>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="process">What process would you like to improve? <span class="required-indicator" aria-hidden="true">*</span></label>
+                <textarea id="process" name="process" rows="2" placeholder="For example: lead follow-up, invoice processing, reporting, approvals, HR onboarding..." maxlength="500" required aria-describedby="process-error"></textarea>
+                <span class="field-error" id="process-error" role="alert" aria-live="polite"></span>
+              </div>
+
+              <div class="field">
+                <label for="message">Tell us a little more <span class="required-indicator" aria-hidden="true">*</span></label>
+                <textarea id="message" name="message" rows="4" placeholder="Describe the current process, the problem you're facing, or what you'd like to automate." maxlength="2000" required aria-describedby="message-error"></textarea>
+                <span class="field-error" id="message-error" role="alert" aria-live="polite"></span>
+              </div>
+
+              <!-- Cloudflare Turnstile Anti-Bot Verification Widget -->
+              <div class="turnstile-wrap">
+                <div class="cf-turnstile" id="cf-turnstile-widget" data-sitekey="0x4AAAAAAACkUQ-XpLLkdA8Q" data-theme="light" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired" data-error-callback="onTurnstileError"></div>
+                <span class="field-error" id="turnstile-error" role="alert" aria-live="polite"></span>
+              </div>
+
+              <button class="btn btn-primary btn-submit" id="submit-btn" type="submit">Request Discovery Session</button>
+            </form>
           </div>
-
-          <!-- Secure Lead Generation Form with Cloudflare Turnstile & Honeypot -->
-          <form class="contact-form reveal" id="lead-form" action="#" method="post" aria-labelledby="form-heading" novalidate>
-            <div class="form-header">
-              <h3 id="form-heading" class="form-title">Request a Workflow Discovery Session</h3>
-              <p class="form-subtitle">Tell us about the process you'd like to improve. We'll review your requirement and identify practical automation opportunities.</p>
-            </div>
-
-            <!-- Form Status Alert -->
-            <div class="form-alert" id="form-alert" role="status" aria-live="polite"></div>
-
-            <!-- Hidden Honeypot Anti-Spam Field (do not fill) -->
-            <div class="oh-honey" aria-hidden="true">
-              <label for="company_website">Company Website</label>
-              <input type="text" id="company_website" name="company_website" tabindex="-1" autocomplete="off" />
-            </div>
-
-            <div class="field">
-              <label for="name">Name <span class="required-indicator" aria-hidden="true">*</span></label>
-              <input id="name" name="name" type="text" placeholder="Your name" autocomplete="name" maxlength="80" required aria-describedby="name-error" />
-              <span class="field-error" id="name-error" role="alert" aria-live="polite"></span>
-            </div>
-
-            <div class="field">
-              <label for="company">Company <span class="required-indicator" aria-hidden="true">*</span></label>
-              <input id="company" name="company" type="text" placeholder="Company name" autocomplete="organization" maxlength="120" required aria-describedby="company-error" />
-              <span class="field-error" id="company-error" role="alert" aria-live="polite"></span>
-            </div>
-
-            <div class="field two-col">
-              <div>
-                <label for="email">Business Email <span class="required-indicator" aria-hidden="true">*</span></label>
-                <input id="email" name="email" type="email" placeholder="you@company.com" autocomplete="email" maxlength="254" required aria-describedby="email-error" />
-                <span class="field-error" id="email-error" role="alert" aria-live="polite"></span>
-              </div>
-              <div>
-                <label for="phone">Phone <span class="required-indicator" aria-hidden="true">*</span></label>
-                <input id="phone" name="phone" type="tel" placeholder="+91 XXXXX XXXXX" autocomplete="tel" maxlength="25" required aria-describedby="phone-error" />
-                <span class="field-error" id="phone-error" role="alert" aria-live="polite"></span>
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="process">What process would you like to improve? <span class="required-indicator" aria-hidden="true">*</span></label>
-              <textarea id="process" name="process" rows="2" placeholder="For example: lead follow-up, invoice processing, reporting, approvals, HR onboarding..." maxlength="500" required aria-describedby="process-error"></textarea>
-              <span class="field-error" id="process-error" role="alert" aria-live="polite"></span>
-            </div>
-
-            <div class="field">
-              <label for="message">Tell us a little more <span class="required-indicator" aria-hidden="true">*</span></label>
-              <textarea id="message" name="message" rows="4" placeholder="Describe the current process, the problem you're facing, or what you'd like to automate." maxlength="2000" required aria-describedby="message-error"></textarea>
-              <span class="field-error" id="message-error" role="alert" aria-live="polite"></span>
-            </div>
-
-            <!-- Cloudflare Turnstile Anti-Bot Verification Widget -->
-            <div class="turnstile-wrap">
-              <div class="cf-turnstile" id="cf-turnstile-widget" data-sitekey="1x00000000000000000000AA" data-theme="light"></div>
-              <span class="field-error" id="turnstile-error" role="alert" aria-live="polite"></span>
-            </div>
-
-            <button class="btn btn-primary btn-submit" id="submit-btn" type="submit">Request Discovery Session</button>
-          </form>
         </div>
       </section>
     </main>
@@ -460,6 +462,6 @@
       </svg>
     </button>
 
-    <script src="script.js?v=1.3"></script>
+    <script src="script.js?v=1.4"></script>
   </body>
 </html>

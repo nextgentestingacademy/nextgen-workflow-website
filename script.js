@@ -20,7 +20,7 @@ navMenu?.querySelectorAll("a").forEach((link) => {
   });
 });
 
-// Clean Hash at Top Helper (Change 1)
+// Clean Hash at Top of Website (Rule: remove section hash only when returning to the absolute top)
 function clearHashAtTop() {
   if (window.scrollY <= 10 && window.location.hash) {
     history.replaceState(null, "", window.location.pathname + window.location.search);
@@ -35,7 +35,7 @@ document.querySelectorAll('a[href="#home"]').forEach((link) => {
       top: 0,
       behavior: "smooth"
     });
-    // Clean section hash immediately
+    // Immediately remove hash when user returns to top
     history.replaceState(null, "", window.location.pathname + window.location.search);
 
     if (navMenu?.classList.contains("open")) {
@@ -66,7 +66,7 @@ backToTopButton?.addEventListener("click", () => {
     top: 0,
     behavior: "smooth"
   });
-  // Clean section hash immediately
+  // Immediately clean hash when clicking back-to-top
   history.replaceState(null, "", window.location.pathname + window.location.search);
 });
 
@@ -91,19 +91,65 @@ if ("IntersectionObserver" in window) {
   revealItems.forEach((item) => item.classList.add("visible"));
 }
 
-// ==========================================
-// FORM VALIDATION & CLOUDFLARE TURNSTILE (Change 2)
-// ==========================================
+// ================================================================
+// CONTACT SECTION FORM SUBMISSION, VALIDATION & CLOUDFLARE TURNSTILE
+// ================================================================
 
-// Configurable Form Endpoint (e.g., Cloudflare Worker, Vercel Serverless Function, or Webhook)
-// When left empty, client validates securely and demonstrates complete workflow
-const FORM_ENDPOINT = ""; 
+// Serverless Form Submission Endpoint (Cloudflare Worker / Vercel / Netlify / Webhook)
+// Set your live backend endpoint URL here (or leaves empty to simulate confirmed processing)
+const FORM_ENDPOINT = "";
 
 const form = document.getElementById("lead-form");
 const submitBtn = document.getElementById("submit-btn");
-const formAlert = document.getElementById("form-alert");
+const contactStatusBanner = document.getElementById("contact-status-banner");
 
-// Validation helper functions
+// Smoothly scroll to the TOP of the Contact section accounting for sticky header
+function scrollToContactTop() {
+  const contactSection = document.getElementById("contact");
+  if (!contactSection) return;
+
+  // Set URL hash to #contact as permitted after form submission
+  if (window.location.hash !== "#contact") {
+    history.replaceState(null, "", "#contact");
+  }
+
+  const header = document.querySelector(".site-header");
+  const headerHeight = header ? header.offsetHeight : 80;
+  const targetY = contactSection.getBoundingClientRect().top + window.scrollY - (headerHeight + 12);
+
+  window.scrollTo({
+    top: Math.max(0, targetY),
+    behavior: "smooth"
+  });
+}
+
+// Display result notification at the top of the Contact section
+function showContactStatus(type, message) {
+  if (!contactStatusBanner) return;
+
+  const iconText = type === "success" ? "✓" : "!";
+  contactStatusBanner.className = `contact-status-banner ${type}`;
+  contactStatusBanner.innerHTML = `
+    <span class="banner-icon" aria-hidden="true">${iconText}</span>
+    <span class="banner-text">${message}</span>
+  `;
+
+  // Smoothly scroll to top of Contact section so user immediately sees the result
+  scrollToContactTop();
+
+  // Shift focus to banner for screen readers / accessibility
+  setTimeout(() => {
+    contactStatusBanner.focus();
+  }, 350);
+}
+
+function hideContactStatus() {
+  if (!contactStatusBanner) return;
+  contactStatusBanner.className = "contact-status-banner";
+  contactStatusBanner.innerHTML = "";
+}
+
+// Field Validators
 const validators = {
   name: (val) => {
     const trimmed = val.trim();
@@ -199,20 +245,7 @@ function clearError(fieldId) {
   }
 }
 
-function showAlert(type, message) {
-  if (!formAlert) return;
-  formAlert.className = `form-alert ${type}`;
-  formAlert.textContent = message;
-  formAlert.scrollIntoView({ behavior: "smooth", block: "nearest" });
-}
-
-function hideAlert() {
-  if (!formAlert) return;
-  formAlert.className = "form-alert";
-  formAlert.textContent = "";
-}
-
-// Live real-time error clearance on input & validation on blur
+// Real-time error clearance on input & blur validation
 ["name", "company", "email", "phone", "process", "message"].forEach((fieldId) => {
   const input = document.getElementById(fieldId);
   if (!input) return;
@@ -238,21 +271,40 @@ function hideAlert() {
   });
 });
 
+// Cloudflare Turnstile Callbacks (Global)
+window.onTurnstileSuccess = function () {
+  clearError("turnstile");
+};
+
+window.onTurnstileExpired = function () {
+  showError("turnstile", "Verification expired. Please complete the verification again.");
+};
+
+window.onTurnstileError = function () {
+  showError("turnstile", "Verification failed. Please try again.");
+};
+
 // Form Submission Handler
+let isSubmitting = false;
+
 form?.addEventListener("submit", async (event) => {
   event.preventDefault();
-  hideAlert();
 
-  // Honeypot check (anti-bot trap)
+  // Prevent duplicate submissions if already in-flight
+  if (isSubmitting) return;
+
+  // Clear previous status banner
+  hideContactStatus();
+
+  // Honeypot anti-spam check (reject silently)
   const honeypot = document.getElementById("company_website");
   if (honeypot && honeypot.value.trim() !== "") {
-    // Bot detected - do not process
     return;
   }
 
-  // 1. Validate all fields
+  // 1. Validate form fields
   let firstInvalid = null;
-  let hasErrors = false;
+  let hasValidationErrors = false;
 
   ["name", "company", "email", "phone", "process", "message"].forEach((fieldId) => {
     const input = document.getElementById(fieldId);
@@ -260,24 +312,25 @@ form?.addEventListener("submit", async (event) => {
     const error = validators[fieldId](input.value);
     if (error) {
       showError(fieldId, error);
-      hasErrors = true;
+      hasValidationErrors = true;
       if (!firstInvalid) firstInvalid = input;
     } else {
       clearError(fieldId);
     }
   });
 
-  // 2. Validate Cloudflare Turnstile token
+  // 2. Validate Turnstile CAPTCHA Token
   const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]');
   const turnstileToken = turnstileResponse ? turnstileResponse.value : "";
   const turnstileErrorEl = document.getElementById("turnstile-error");
 
+  let hasCaptchaError = false;
   if (!turnstileToken) {
     if (turnstileErrorEl) {
       turnstileErrorEl.textContent = "Please complete the verification before submitting the form.";
       turnstileErrorEl.classList.add("visible");
     }
-    hasErrors = true;
+    hasCaptchaError = true;
     if (!firstInvalid) {
       firstInvalid = document.querySelector(".cf-turnstile") || submitBtn;
     }
@@ -288,12 +341,14 @@ form?.addEventListener("submit", async (event) => {
     }
   }
 
-  if (hasErrors) {
+  // If there are validation or CAPTCHA errors:
+  // Do NOT submit, do NOT show generic server failure, PRESERVE entered data, and focus first invalid field.
+  if (hasValidationErrors || hasCaptchaError) {
     firstInvalid?.focus();
     return;
   }
 
-  // 3. Prepare payload
+  // 3. Prepare Form Payload
   const formData = {
     name: document.getElementById("name")?.value.trim(),
     company: document.getElementById("company")?.value.trim(),
@@ -304,7 +359,8 @@ form?.addEventListener("submit", async (event) => {
     turnstileToken: turnstileToken
   };
 
-  // 4. Update UI to submitting state
+  // 4. Update UI to Submitting State
+  isSubmitting = true;
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting...";
@@ -325,18 +381,23 @@ form?.addEventListener("submit", async (event) => {
 
       const result = await response.json();
       if (!result.success) {
-        throw new Error(result.error || "Verification failed");
+        throw new Error(result.error || "Server rejected submission");
       }
     } else {
-      // Static / Demo Mode simulation (validates completely and resets)
+      // Static / Simulated Submission Delay
       await new Promise((resolve) => setTimeout(resolve, 800));
     }
 
-    // Success response
-    showAlert("success", "Thank you. We've received your request and will get back to you shortly.");
+    // ==========================================
+    // SUCCESSFUL SUBMISSION
+    // ==========================================
+    // 1. Display success message at top of Contact section
+    showContactStatus("success", "Thank you. We've received your request and will get back to you shortly.");
+
+    // 2. Clear form fields ONLY after confirmed success
     form.reset();
 
-    // Reset Cloudflare Turnstile widget if present
+    // 3. Reset Turnstile widget
     if (window.turnstile) {
       try {
         window.turnstile.reset();
@@ -345,9 +406,26 @@ form?.addEventListener("submit", async (event) => {
       }
     }
   } catch (error) {
-    console.error("Form submission error:", error);
-    showAlert("error", "We couldn't submit your request right now. Please try again or contact us at hello@nextgenworkflow.co.");
+    // ==========================================
+    // FAILED SUBMISSION (Server / Network Error)
+    // ==========================================
+    console.error("Form submission failed:", error);
+
+    // 1. Display failure message at top of Contact section
+    showContactStatus("error", "We couldn't submit your request right now. Please try again or contact us at hello@nextgenworkflow.co.");
+
+    // 2. IMPORTANT: DO NOT clear the form. PRESERVE all user-entered data so they can retry.
+    // 3. Reset Turnstile widget to allow re-verification if token was consumed
+    if (window.turnstile) {
+      try {
+        window.turnstile.reset();
+      } catch (e) {
+        // ignore reset errors
+      }
+    }
   } finally {
+    // Restore Submit Button
+    isSubmitting = false;
     if (submitBtn) {
       submitBtn.disabled = false;
       submitBtn.textContent = "Request Discovery Session";
