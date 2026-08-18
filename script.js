@@ -15,6 +15,43 @@ navMenu?.querySelectorAll("a").forEach((link) => {
   });
 });
 
+// Home Navigation & Brand Smooth Scroll to Absolute Top
+document.querySelectorAll('a[href="#home"]').forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+    if (navMenu?.classList.contains("open")) {
+      navMenu.classList.remove("open");
+      menuToggle?.setAttribute("aria-expanded", "false");
+      menuToggle?.setAttribute("aria-label", "Open navigation menu");
+    }
+  });
+});
+
+// Floating Back-to-Top Button
+const backToTopButton = document.querySelector(".back-to-top");
+
+const handleScroll = () => {
+  if (window.scrollY > 200) {
+    backToTopButton?.classList.add("visible");
+  } else {
+    backToTopButton?.classList.remove("visible");
+  }
+};
+
+window.addEventListener("scroll", handleScroll, { passive: true });
+handleScroll();
+
+backToTopButton?.addEventListener("click", () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+});
+
 const revealItems = document.querySelectorAll(".reveal");
 
 if ("IntersectionObserver" in window) {

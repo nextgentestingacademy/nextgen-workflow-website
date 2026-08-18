@@ -22,7 +22,7 @@
     <script>
       document.documentElement.classList.add("js-enabled");
     </script>
-    <link rel="stylesheet" href="styles.css?v=1.1" />
+    <link rel="stylesheet" href="styles.css?v=1.2" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -278,7 +278,7 @@
             <span>Reporting & Dashboards</span>
           </div>
           <div class="vendor-examples reveal">
-            <span>OpenAI</span><span>Microsoft</span><span>Google Workspace</span><span>n8n</span><span>Make</span><span>Zapier</span><span>Python</span><span>APIs</span><span>CRM</span><span>ERP</span><span>Databases</span>
+            <span>OpenAI</span><span>Microsoft</span><span>Google Workspace</span><span>n8n</span><span>Make</span><span>Zapier</span><span>Python</span><span>APIs</span><span>CRM</span><span>ERP</span>
           </div>
           <p class="section-note reveal">We work with the technology that best fits your existing environment and business requirements.</p>
         </div>
@@ -398,30 +398,40 @@
 
     <footer class="footer">
       <div class="container footer-grid">
-        <div>
-          <a class="brand footer-brand" href="#home">
+        <div class="footer-brand-col">
+          <a class="brand footer-brand" href="#home" aria-label="NextGen Workflow Automation home">
             <span>NEXTGEN</span>
             <strong>WORKFLOW AUTOMATION</strong>
           </a>
-          <p>Enterprise Workflow Automation & Intelligent Business Systems</p>
-          <p>Process-first. Technology-enabled. Outcome-focused.</p>
+          <p class="footer-descriptor">Enterprise Workflow Automation & Intelligent Business Systems</p>
+          <p class="footer-tagline">Process-first. Technology-enabled. Outcome-focused.</p>
         </div>
-        <nav aria-label="Footer navigation">
-          <a href="#home">Home</a>
-          <a href="#what-we-do">What We Do</a>
-          <a href="#solutions">Solutions</a>
-          <a href="#how-we-work">How We Work</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
-        </nav>
-        <div class="footer-links">
-          <a href="#contact">Privacy Policy</a>
-          <a href="#contact">Terms</a>
-          <p>© 2026 NextGen Workflow Automation. All rights reserved.</p>
+        <div class="footer-right-col">
+          <nav class="footer-nav" aria-label="Footer navigation">
+            <a href="#home">Home</a>
+            <a href="#what-we-do">What We Do</a>
+            <a href="#solutions">Solutions</a>
+            <a href="#how-we-work">How We Work</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+          </nav>
+          <div class="footer-legal-wrap">
+            <div class="footer-legal-links">
+              <a href="#contact">Privacy Policy</a>
+              <a href="#contact">Terms</a>
+            </div>
+            <p class="footer-copyright">© 2026 NextGen Workflow Automation. All rights reserved.</p>
+          </div>
         </div>
       </div>
     </footer>
 
-    <script src="script.js?v=1.1"></script>
+    <button class="back-to-top" type="button" aria-label="Back to top" title="Back to top">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m18 15-6-6-6 6"/>
+      </svg>
+    </button>
+
+    <script src="script.js?v=1.2"></script>
   </body>
 </html>
