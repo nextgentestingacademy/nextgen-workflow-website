@@ -2,10 +2,9 @@
  * NextGen Workflow Automation - Secure Form Submission Cloudflare Worker
  * Runtime: Cloudflare Workers (ES Module format: export default { async fetch(request, env, ctx) })
  *
- * Secret Binding:
+ * Secret Bindings:
  * - CLOUDFLARE_TURNSTILE_SECRET_KEY: Secret key from Cloudflare Turnstile dashboard
- *   (Set in Cloudflare Dashboard > Workers & Pages > Settings > Variables and Secrets,
- *    or via `npx wrangler secret put CLOUDFLARE_TURNSTILE_SECRET_KEY`)
+ * - RESEND_API_KEY: API key from Resend dashboard (for hello@nextgenworkflow.co delivery)
  */
 
 export default {
@@ -171,7 +170,6 @@ export default {
       }
 
       // 7. Cloudflare Turnstile Server-Side Token Verification
-      // In Cloudflare Workers, secrets are bound on the `env` parameter
       const turnstileSecret = env?.CLOUDFLARE_TURNSTILE_SECRET_KEY || env?.TURNSTILE_SECRET || "";
       const expectedAction = "contact";
       const expectedHostnames = new Set([
@@ -253,23 +251,199 @@ export default {
       const sanitize = (str) =>
         String(str).replace(/[&<>"']/g, (s) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s]));
 
-      const leadData = {
-        name: sanitize(name.trim()),
-        company: sanitize(company.trim()),
-        email: sanitize(email.trim()),
-        phone: sanitize(phone.trim()),
-        process: sanitize(process.trim()),
-        message: sanitize(message.trim()),
-        timestamp: new Date().toISOString()
+      const rawName = name.trim();
+      const rawCompany = company.trim();
+      const rawEmail = email.trim();
+      const rawPhone = phone.trim();
+      const rawProcess = process.trim();
+      const rawMessage = message.trim();
+      const timestampIso = new Date().toISOString();
+
+      const safeName = sanitize(rawName);
+      const safeCompany = sanitize(rawCompany);
+      const safeEmail = sanitize(rawEmail);
+      const safePhone = sanitize(rawPhone);
+      const safeProcess = sanitize(rawProcess);
+      const safeMessage = sanitize(rawMessage);
+
+      // 9. Resend REST API Email Delivery
+      const resendApiKey = env?.RESEND_API_KEY || "";
+      if (!resendApiKey) {
+        console.error("Missing RESEND_API_KEY binding in Cloudflare Worker environment");
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "Email service configuration missing"
+          }),
+          {
+            status: 500,
+            headers: jsonHeaders
+          }
+        );
+      }
+
+      const emailSubject = `New Workflow Discovery Request — ${rawCompany}`;
+
+      const emailHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${emailSubject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0b1220; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #0b1220; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <!-- Header Banner -->
+          <tr>
+            <td style="background-color: #0f172a; padding: 24px 32px; border-bottom: 3px solid #2563eb;">
+              <h1 style="margin: 0; font-size: 20px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;">NextGen Workflow Automation</h1>
+              <p style="margin: 4px 0 0 0; font-size: 13px; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase;">New Workflow Discovery Request</p>
+            </td>
+          </tr>
+          <!-- Body Content -->
+          <tr>
+            <td style="padding: 32px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; width: 140px; font-weight: 600; color: #475569; font-size: 14px; vertical-align: top;">Name:</td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 15px; font-weight: 500;">${safeName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; width: 140px; font-weight: 600; color: #475569; font-size: 14px; vertical-align: top;">Company:</td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 15px; font-weight: 600;">${safeCompany}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; width: 140px; font-weight: 600; color: #475569; font-size: 14px; vertical-align: top;">Business Email:</td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #2563eb; font-size: 15px;">
+                    <a href="mailto:${safeEmail}" style="color: #2563eb; text-decoration: none;">${safeEmail}</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; width: 140px; font-weight: 600; color: #475569; font-size: 14px; vertical-align: top;">Phone:</td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 15px;">
+                    <a href="tel:${safePhone}" style="color: #0f172a; text-decoration: none;">${safePhone}</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; width: 140px; font-weight: 600; color: #475569; font-size: 14px; vertical-align: top;">Process to improve:</td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 14px; line-height: 1.5;">${safeProcess}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; width: 140px; font-weight: 600; color: #475569; font-size: 14px; vertical-align: top;">Additional details:</td>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 14px; line-height: 1.5; white-space: pre-wrap;">${safeMessage}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; width: 140px; font-weight: 600; color: #64748b; font-size: 13px; vertical-align: top;">Submitted At:</td>
+                  <td style="padding: 10px 0; color: #64748b; font-size: 13px;">${timestampIso}</td>
+                </tr>
+              </table>
+
+              <div style="background-color: #f8fafc; border-left: 3px solid #2563eb; padding: 12px 16px; border-radius: 0 4px 4px 0;">
+                <p style="margin: 0; font-size: 13px; color: #475569;">
+                  <strong>Reply-To Enabled:</strong> Hitting &ldquo;Reply&rdquo; in your email client will respond directly to <a href="mailto:${safeEmail}" style="color: #2563eb; text-decoration: none;">${safeEmail}</a>.
+                </p>
+              </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8fafc; padding: 16px 32px; border-top: 1px solid #e2e8f0; text-align: center;">
+              <p style="margin: 0; font-size: 12px; color: #94a3b8;">NextGen Workflow Automation &bull; Secure Lead Ingestion Pipeline</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+      const emailText = `NextGen Workflow Automation
+New Workflow Discovery Request
+
+Name: ${rawName}
+Company: ${rawCompany}
+Business Email: ${rawEmail}
+Phone: ${rawPhone}
+
+Process they want to improve:
+${rawProcess}
+
+Additional details:
+${rawMessage}
+
+Submitted: ${timestampIso}
+Reply-To: ${rawEmail}
+`;
+
+      const resendPayload = {
+        from: "NextGen Workflow Automation <hello@nextgenworkflow.co>",
+        to: ["hello@nextgenworkflow.co"],
+        reply_to: rawEmail,
+        subject: emailSubject,
+        html: emailHtml,
+        text: emailText
       };
 
-      // 9. Confirmed Receipt (Email dispatch will be attached in a subsequent step)
-      console.log("Verified Lead Received:", leadData);
+      let resendRes;
+      try {
+        resendRes = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${resendApiKey}`,
+            "Content-Type": "application/json"
+          },
+          signal: AbortSignal.timeout(15_000),
+          body: JSON.stringify(resendPayload)
+        });
+      } catch (networkErr) {
+        console.error("Resend API network dispatch failed:", networkErr?.message || networkErr);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "Unable to send your request right now. Please try again later."
+          }),
+          {
+            status: 502,
+            headers: jsonHeaders
+          }
+        );
+      }
 
+      if (!resendRes.ok) {
+        const resendStatus = resendRes.status;
+        let resendErrDetails = "";
+        try {
+          const errJson = await resendRes.json();
+          resendErrDetails = errJson?.message || JSON.stringify(errJson);
+        } catch {
+          resendErrDetails = await resendRes.text();
+        }
+        console.error(`Resend API rejected delivery (HTTP ${resendStatus}):`, resendErrDetails);
+
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "Unable to send your request right now. Please try again later."
+          }),
+          {
+            status: 502,
+            headers: jsonHeaders
+          }
+        );
+      }
+
+      const resendResult = await resendRes.json();
+      console.log("Resend delivery accepted successfully. Email ID:", resendResult?.id);
+
+      // 10. Success Response (Exact specification)
       return new Response(
         JSON.stringify({
           success: true,
-          message: "Thank you. We've received your request and will get back to you shortly."
+          message: "Your request has been received."
         }),
         {
           status: 200,
