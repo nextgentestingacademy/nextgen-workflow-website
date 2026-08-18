@@ -22,7 +22,8 @@
     <script>
       document.documentElement.classList.add("js-enabled");
     </script>
-    <link rel="stylesheet" href="styles.css?v=1.2" />
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <link rel="stylesheet" href="styles.css?v=1.3" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -358,39 +359,66 @@
             </div>
           </div>
 
-          <!-- TODO: Connect backend form submission endpoint (e.g. Formspree / Webhook / Make / n8n / Zapier) -->
-          <form class="contact-form reveal" action="#" method="post" aria-labelledby="form-heading">
+          <!-- Secure Lead Generation Form with Cloudflare Turnstile & Honeypot -->
+          <form class="contact-form reveal" id="lead-form" action="#" method="post" aria-labelledby="form-heading" novalidate>
             <div class="form-header">
               <h3 id="form-heading" class="form-title">Request a Workflow Discovery Session</h3>
               <p class="form-subtitle">Tell us about the process you'd like to improve. We'll review your requirement and identify practical automation opportunities.</p>
             </div>
-            <div class="field">
-              <label for="name">Name</label>
-              <input id="name" name="name" type="text" placeholder="Your name" autocomplete="name" required />
+
+            <!-- Form Status Alert -->
+            <div class="form-alert" id="form-alert" role="status" aria-live="polite"></div>
+
+            <!-- Hidden Honeypot Anti-Spam Field (do not fill) -->
+            <div class="oh-honey" aria-hidden="true">
+              <label for="company_website">Company Website</label>
+              <input type="text" id="company_website" name="company_website" tabindex="-1" autocomplete="off" />
             </div>
+
             <div class="field">
-              <label for="company">Company</label>
-              <input id="company" name="company" type="text" placeholder="Company name" autocomplete="organization" required />
+              <label for="name">Name <span class="required-indicator" aria-hidden="true">*</span></label>
+              <input id="name" name="name" type="text" placeholder="Your name" autocomplete="name" maxlength="80" required aria-describedby="name-error" />
+              <span class="field-error" id="name-error" role="alert" aria-live="polite"></span>
             </div>
+
+            <div class="field">
+              <label for="company">Company <span class="required-indicator" aria-hidden="true">*</span></label>
+              <input id="company" name="company" type="text" placeholder="Company name" autocomplete="organization" maxlength="120" required aria-describedby="company-error" />
+              <span class="field-error" id="company-error" role="alert" aria-live="polite"></span>
+            </div>
+
             <div class="field two-col">
               <div>
-                <label for="email">Business Email</label>
-                <input id="email" name="email" type="email" placeholder="you@company.com" autocomplete="email" required />
+                <label for="email">Business Email <span class="required-indicator" aria-hidden="true">*</span></label>
+                <input id="email" name="email" type="email" placeholder="you@company.com" autocomplete="email" maxlength="254" required aria-describedby="email-error" />
+                <span class="field-error" id="email-error" role="alert" aria-live="polite"></span>
               </div>
               <div>
-                <label for="phone">Phone</label>
-                <input id="phone" name="phone" type="tel" placeholder="+91 XXXXX XXXXX" autocomplete="tel" />
+                <label for="phone">Phone <span class="required-indicator" aria-hidden="true">*</span></label>
+                <input id="phone" name="phone" type="tel" placeholder="+91 XXXXX XXXXX" autocomplete="tel" maxlength="25" required aria-describedby="phone-error" />
+                <span class="field-error" id="phone-error" role="alert" aria-live="polite"></span>
               </div>
             </div>
+
             <div class="field">
-              <label for="process">What process would you like to improve?</label>
-              <textarea id="process" name="process" rows="2" placeholder="For example: lead follow-up, invoice processing, reporting, approvals, HR onboarding..."></textarea>
+              <label for="process">What process would you like to improve? <span class="required-indicator" aria-hidden="true">*</span></label>
+              <textarea id="process" name="process" rows="2" placeholder="For example: lead follow-up, invoice processing, reporting, approvals, HR onboarding..." maxlength="500" required aria-describedby="process-error"></textarea>
+              <span class="field-error" id="process-error" role="alert" aria-live="polite"></span>
             </div>
+
             <div class="field">
-              <label for="message">Tell us a little more</label>
-              <textarea id="message" name="message" rows="4" placeholder="Describe the current process, the problem you're facing, or what you'd like to automate."></textarea>
+              <label for="message">Tell us a little more <span class="required-indicator" aria-hidden="true">*</span></label>
+              <textarea id="message" name="message" rows="4" placeholder="Describe the current process, the problem you're facing, or what you'd like to automate." maxlength="2000" required aria-describedby="message-error"></textarea>
+              <span class="field-error" id="message-error" role="alert" aria-live="polite"></span>
             </div>
-            <button class="btn btn-primary btn-submit" type="submit">Request Discovery Session</button>
+
+            <!-- Cloudflare Turnstile Anti-Bot Verification Widget -->
+            <div class="turnstile-wrap">
+              <div class="cf-turnstile" id="cf-turnstile-widget" data-sitekey="1x00000000000000000000AA" data-theme="light"></div>
+              <span class="field-error" id="turnstile-error" role="alert" aria-live="polite"></span>
+            </div>
+
+            <button class="btn btn-primary btn-submit" id="submit-btn" type="submit">Request Discovery Session</button>
           </form>
         </div>
       </section>
@@ -432,6 +460,6 @@
       </svg>
     </button>
 
-    <script src="script.js?v=1.2"></script>
+    <script src="script.js?v=1.3"></script>
   </body>
 </html>
