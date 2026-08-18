@@ -84,12 +84,19 @@ export default async function handler(req, res) {
       });
     }
 
-    // 3. Cloudflare Turnstile Server-Side Token Verification
-    const turnstileSecret = process.env?.CLOUDFLARE_TURNSTILE_SECRET_KEY || "";
-    
+    // 3. Canonical Cloudflare Turnstile Server-Side Token Verification
+    const turnstileSecret = process.env?.TURNSTILE_SECRET || process.env?.CLOUDFLARE_TURNSTILE_SECRET_KEY || "";
+    const expectedAction = "contact";
+    const expectedHostnames = new Set(
+      (process.env?.TURNSTILE_HOSTNAMES ?? "nextgenworkflow.co,www.nextgenworkflow.co")
+        .split(",")
+        .map((h) => h.trim())
+        .filter(Boolean)
+    );
+
     if (turnstileSecret) {
-      if (!turnstileToken) {
-        return new Response(JSON.stringify({ success: false, error: "Missing Turnstile verification token" }), {
+      if (!turnstileToken || typeof turnstileToken !== "string" || turnstileToken.length > 2048) {
+        return new Response(JSON.stringify({ success: false, error: "Missing or invalid Turnstile verification token" }), {
           status: 400,
           headers: { ...headers, "Content-Type": "application/json" }
         });
@@ -97,18 +104,36 @@ export default async function handler(req, res) {
 
       const clientIp = req.headers?.get?.("CF-Connecting-IP") || req.headers?.get?.("x-forwarded-for") || "";
 
-      const verifyFormData = new FormData();
-      verifyFormData.append("secret", turnstileSecret);
-      verifyFormData.append("response", turnstileToken);
-      if (clientIp) verifyFormData.append("remoteip", clientIp);
+      let siteverifyResult;
+      try {
+        const turnstileRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          signal: AbortSignal.timeout(10_000),
+          body: new URLSearchParams({
+            secret: turnstileSecret,
+            response: turnstileToken,
+            remoteip: clientIp
+          })
+        });
 
-      const turnstileRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-        method: "POST",
-        body: verifyFormData
-      });
+        if (!turnstileRes.ok) {
+          throw new Error(`siteverify returned status ${turnstileRes.status}`);
+        }
+        siteverifyResult = await turnstileRes.json();
+      } catch (verifyErr) {
+        console.error("Cloudflare siteverify request failed:", verifyErr);
+        return new Response(JSON.stringify({ success: false, error: "CAPTCHA verification service unavailable" }), {
+          status: 502,
+          headers: { ...headers, "Content-Type": "application/json" }
+        });
+      }
 
-      const turnstileOutcome = await turnstileRes.json();
-      if (!turnstileOutcome.success) {
+      if (
+        !siteverifyResult.success ||
+        (siteverifyResult.action && siteverifyResult.action !== expectedAction) ||
+        (siteverifyResult.hostname && expectedHostnames.size > 0 && !expectedHostnames.has(siteverifyResult.hostname))
+      ) {
         return new Response(JSON.stringify({ success: false, error: "CAPTCHA verification failed" }), {
           status: 403,
           headers: { ...headers, "Content-Type": "application/json" }
@@ -130,10 +155,9 @@ export default async function handler(req, res) {
     };
 
     // 5. Dispatch Lead (Example: Resend / SendGrid / Webhook / Make / n8n)
-    // TODO: Connect email or CRM provider using environment variables
-    console.log("New Lead Received:", leadData);
+    console.log("New Verified Lead Received:", leadData);
 
-    return new Response(JSON.stringify({ success: true, message: "Discovery session request received" }), {
+    return new Response(JSON.stringify({ success: true, message: "Thank you. We've received your request and will get back to you shortly." }), {
       status: 200,
       headers: { ...headers, "Content-Type": "application/json" }
     });

@@ -280,8 +280,8 @@ window.onTurnstileExpired = function () {
   showError("turnstile", "Verification expired. Please complete the verification again.");
 };
 
-window.onTurnstileError = function () {
-  showError("turnstile", "Verification failed. Please try again.");
+window.onTurnstileError = function (errorCode) {
+  console.warn("Cloudflare Turnstile notice:", errorCode);
 };
 
 // Form Submission Handler
