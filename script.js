@@ -35,9 +35,12 @@ if ("IntersectionObserver" in window) {
   revealItems.forEach((item) => item.classList.add("visible"));
 }
 
+// Contact Form Handler
+// TODO: Connect to live backend endpoint/webhook (e.g., Formspree, Make, n8n, Zapier, or custom API)
 document.querySelector(".contact-form")?.addEventListener("submit", (event) => {
   event.preventDefault();
   const button = event.currentTarget.querySelector("button");
+  if (!button) return;
   const originalText = button.textContent;
   button.textContent = "Request Ready to Send";
   setTimeout(() => {
