@@ -56,6 +56,7 @@ const handleScroll = () => {
     backToTopButton?.classList.remove("visible");
   }
   clearHashAtTop();
+  checkContactExit();
 };
 
 window.addEventListener("scroll", handleScroll, { passive: true });
@@ -101,11 +102,15 @@ const FORM_ENDPOINT = "";
 
 const form = document.getElementById("lead-form");
 const submitBtn = document.getElementById("submit-btn");
+const contactSection = document.getElementById("contact");
 const contactStatusBanner = document.getElementById("contact-status-banner");
+
+// Notification lifecycle state tracking
+let isNotificationActive = false;
+let hasNotificationBeenViewed = false;
 
 // Smoothly scroll to the TOP of the Contact section accounting for sticky header
 function scrollToContactTop() {
-  const contactSection = document.getElementById("contact");
   if (!contactSection) return;
 
   // Set URL hash to #contact as permitted after form submission
@@ -134,19 +139,63 @@ function showContactStatus(type, message) {
     <span class="banner-text">${message}</span>
   `;
 
+  // Start active notification lifecycle
+  isNotificationActive = true;
+  hasNotificationBeenViewed = false;
+
   // Smoothly scroll to top of Contact section so user immediately sees the result
   scrollToContactTop();
 
   // Shift focus to banner for screen readers / accessibility
   setTimeout(() => {
     contactStatusBanner.focus();
-  }, 350);
+    // Allow smooth scroll to settle before marking as viewed
+    hasNotificationBeenViewed = true;
+  }, 400);
 }
 
+// Hide notification and reset lifecycle
 function hideContactStatus() {
   if (!contactStatusBanner) return;
   contactStatusBanner.className = "contact-status-banner";
   contactStatusBanner.innerHTML = "";
+  isNotificationActive = false;
+  hasNotificationBeenViewed = false;
+}
+
+// Check if user has scrolled away from Contact section (Scroll-event fallback)
+function checkContactExit() {
+  if (!isNotificationActive || !hasNotificationBeenViewed || !contactSection) return;
+
+  const rect = contactSection.getBoundingClientRect();
+  const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+
+  // Contact section is considered exited when it is no longer visible in viewport
+  // (scrolled completely below it or scrolled completely above it)
+  const isOutOfView = rect.bottom <= 0 || rect.top >= windowHeight;
+
+  if (isOutOfView) {
+    hideContactStatus();
+  }
+}
+
+// Viewport / Section Exit Detection using IntersectionObserver
+if ("IntersectionObserver" in window && contactSection) {
+  const contactObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        // If user has seen the notification and now leaves the Contact section, hide it
+        if (!entry.isIntersecting) {
+          if (isNotificationActive && hasNotificationBeenViewed) {
+            hideContactStatus();
+          }
+        }
+      });
+    },
+    { threshold: 0 }
+  );
+
+  contactObserver.observe(contactSection);
 }
 
 // Field Validators
