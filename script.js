@@ -25,8 +25,7 @@ let hasNotificationBeenViewed = false;
 let isSubmitting = false;
 
 // Configurable Form Submission Endpoint (Cloudflare Worker / Serverless API)
-// Leave empty ("") for static / demo processing until Cloudflare Worker is deployed.
-const FORM_ENDPOINT = "";
+const FORM_ENDPOINT = "https://nextgen-workflow-form.nextgen-workflow-website.workers.dev";
 
 // ================================================================
 // 2. HELPER FUNCTIONS
