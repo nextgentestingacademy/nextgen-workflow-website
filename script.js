@@ -2,118 +2,47 @@
  * NextGen Workflow Automation - Main JavaScript
  */
 
-// Mobile Navigation Toggle
+// ================================================================
+// 1. DOM REFERENCES & STATE DECLARATIONS
+// (Declared at top to prevent Temporal Dead Zone ReferenceErrors)
+// ================================================================
+
+// Navigation & Global UI
 const menuToggle = document.querySelector(".menu-toggle");
 const navMenu = document.querySelector(".nav-menu");
+const backToTopButton = document.querySelector(".back-to-top");
+const revealItems = document.querySelectorAll(".reveal");
 
-menuToggle?.addEventListener("click", () => {
-  const isOpen = navMenu.classList.toggle("open");
-  menuToggle.setAttribute("aria-expanded", String(isOpen));
-  menuToggle.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
-});
+// Contact Section & Form Elements
+const contactSection = document.getElementById("contact");
+const contactStatusBanner = document.getElementById("contact-status-banner");
+const form = document.getElementById("lead-form");
+const submitBtn = document.getElementById("submit-btn");
 
-navMenu?.querySelectorAll("a").forEach((link) => {
-  link.addEventListener("click", () => {
-    navMenu.classList.remove("open");
-    menuToggle?.setAttribute("aria-expanded", "false");
-    menuToggle?.setAttribute("aria-label", "Open navigation menu");
-  });
-});
+// State Tracking
+let isNotificationActive = false;
+let hasNotificationBeenViewed = false;
+let isSubmitting = false;
 
-// Clean Hash at Top of Website (Rule: remove section hash only when returning to the absolute top)
+// Configurable Form Submission Endpoint (Cloudflare Worker / Serverless API)
+// Leave empty ("") for static / demo processing until Cloudflare Worker is deployed.
+const FORM_ENDPOINT = "";
+
+// ================================================================
+// 2. HELPER FUNCTIONS
+// ================================================================
+
+// Clean URL Hash at absolute top of page
 function clearHashAtTop() {
   if (window.scrollY <= 10 && window.location.hash) {
     history.replaceState(null, "", window.location.pathname + window.location.search);
   }
 }
 
-// Home Navigation & Brand Smooth Scroll to Absolute Top
-document.querySelectorAll('a[href="#home"]').forEach((link) => {
-  link.addEventListener("click", (event) => {
-    event.preventDefault();
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-    // Immediately remove hash when user returns to top
-    history.replaceState(null, "", window.location.pathname + window.location.search);
-
-    if (navMenu?.classList.contains("open")) {
-      navMenu.classList.remove("open");
-      menuToggle?.setAttribute("aria-expanded", "false");
-      menuToggle?.setAttribute("aria-label", "Open navigation menu");
-    }
-  });
-});
-
-// Floating Back-to-Top Button
-const backToTopButton = document.querySelector(".back-to-top");
-
-const handleScroll = () => {
-  if (window.scrollY > 200) {
-    backToTopButton?.classList.add("visible");
-  } else {
-    backToTopButton?.classList.remove("visible");
-  }
-  clearHashAtTop();
-  checkContactExit();
-};
-
-window.addEventListener("scroll", handleScroll, { passive: true });
-handleScroll();
-
-backToTopButton?.addEventListener("click", () => {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-  // Immediately clean hash when clicking back-to-top
-  history.replaceState(null, "", window.location.pathname + window.location.search);
-});
-
-// Scroll Reveal Animations
-const revealItems = document.querySelectorAll(".reveal");
-
-if ("IntersectionObserver" in window) {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.12 }
-  );
-
-  revealItems.forEach((item) => observer.observe(item));
-} else {
-  revealItems.forEach((item) => item.classList.add("visible"));
-}
-
-// ================================================================
-// CONTACT SECTION FORM SUBMISSION, VALIDATION & CLOUDFLARE TURNSTILE
-// ================================================================
-
-// Serverless Form Submission Endpoint (Cloudflare Worker / Vercel / Netlify / Webhook)
-// Set your live backend endpoint URL here (or leaves empty to simulate confirmed processing)
-const FORM_ENDPOINT = "";
-
-const form = document.getElementById("lead-form");
-const submitBtn = document.getElementById("submit-btn");
-const contactSection = document.getElementById("contact");
-const contactStatusBanner = document.getElementById("contact-status-banner");
-
-// Notification lifecycle state tracking
-let isNotificationActive = false;
-let hasNotificationBeenViewed = false;
-
 // Smoothly scroll to the TOP of the Contact section accounting for sticky header
 function scrollToContactTop() {
   if (!contactSection) return;
 
-  // Set URL hash to #contact as permitted after form submission
   if (window.location.hash !== "#contact") {
     history.replaceState(null, "", "#contact");
   }
@@ -170,8 +99,7 @@ function checkContactExit() {
   const rect = contactSection.getBoundingClientRect();
   const windowHeight = window.innerHeight || document.documentElement.clientHeight;
 
-  // Contact section is considered exited when it is no longer visible in viewport
-  // (scrolled completely below it or scrolled completely above it)
+  // Contact section is considered exited when it is completely outside the viewport
   const isOutOfView = rect.bottom <= 0 || rect.top >= windowHeight;
 
   if (isOutOfView) {
@@ -179,26 +107,18 @@ function checkContactExit() {
   }
 }
 
-// Viewport / Section Exit Detection using IntersectionObserver
-if ("IntersectionObserver" in window && contactSection) {
-  const contactObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        // If user has seen the notification and now leaves the Contact section, hide it
-        if (!entry.isIntersecting) {
-          if (isNotificationActive && hasNotificationBeenViewed) {
-            hideContactStatus();
-          }
-        }
-      });
-    },
-    { threshold: 0 }
-  );
+// Main Window Scroll Handler
+const handleScroll = () => {
+  if (window.scrollY > 200) {
+    backToTopButton?.classList.add("visible");
+  } else {
+    backToTopButton?.classList.remove("visible");
+  }
+  clearHashAtTop();
+  checkContactExit();
+};
 
-  contactObserver.observe(contactSection);
-}
-
-// Field Validators
+// Field Validation Rules
 const validators = {
   name: (val) => {
     const trimmed = val.trim();
@@ -294,6 +214,93 @@ function clearError(fieldId) {
   }
 }
 
+// ================================================================
+// 3. EVENT LISTENERS & INITIALIZATION
+// ================================================================
+
+// Mobile Navigation
+menuToggle?.addEventListener("click", () => {
+  const isOpen = navMenu.classList.toggle("open");
+  menuToggle.setAttribute("aria-expanded", String(isOpen));
+  menuToggle.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
+});
+
+navMenu?.querySelectorAll("a").forEach((link) => {
+  link.addEventListener("click", () => {
+    navMenu.classList.remove("open");
+    menuToggle?.setAttribute("aria-expanded", "false");
+    menuToggle?.setAttribute("aria-label", "Open navigation menu");
+  });
+});
+
+// Home Links: Smooth scroll to absolute top
+document.querySelectorAll('a[href="#home"]').forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+
+    if (navMenu?.classList.contains("open")) {
+      navMenu.classList.remove("open");
+      menuToggle?.setAttribute("aria-expanded", "false");
+      menuToggle?.setAttribute("aria-label", "Open navigation menu");
+    }
+  });
+});
+
+// Back-to-Top Button
+backToTopButton?.addEventListener("click", () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+  history.replaceState(null, "", window.location.pathname + window.location.search);
+});
+
+// Register Scroll Listener and run initial check safely
+window.addEventListener("scroll", handleScroll, { passive: true });
+handleScroll();
+
+// Scroll Reveal Animations
+if ("IntersectionObserver" in window) {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.12 }
+  );
+
+  revealItems.forEach((item) => observer.observe(item));
+} else {
+  revealItems.forEach((item) => item.classList.add("visible"));
+}
+
+// Contact Section Exit Detection (IntersectionObserver)
+if ("IntersectionObserver" in window && contactSection) {
+  const contactObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          if (isNotificationActive && hasNotificationBeenViewed) {
+            hideContactStatus();
+          }
+        }
+      });
+    },
+    { threshold: 0 }
+  );
+
+  contactObserver.observe(contactSection);
+}
+
 // Real-time error clearance on input & blur validation
 ["name", "company", "email", "phone", "process", "message"].forEach((fieldId) => {
   const input = document.getElementById(fieldId);
@@ -320,7 +327,7 @@ function clearError(fieldId) {
   });
 });
 
-// Cloudflare Turnstile Callbacks (Global)
+// Global Cloudflare Turnstile Callbacks
 window.onTurnstileSuccess = function () {
   clearError("turnstile");
 };
@@ -334,9 +341,8 @@ window.onTurnstileError = function (errorCode) {
 };
 
 // Form Submission Handler
-let isSubmitting = false;
-
 form?.addEventListener("submit", async (event) => {
+  // Always prevent default native browser form submission
   event.preventDefault();
 
   // Prevent duplicate submissions if already in-flight
@@ -417,7 +423,7 @@ form?.addEventListener("submit", async (event) => {
 
   try {
     if (FORM_ENDPOINT) {
-      // Production Serverless Submission Flow
+      // Production Serverless Submission Flow (When Worker is deployed)
       const response = await fetch(FORM_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -440,13 +446,12 @@ form?.addEventListener("submit", async (event) => {
     // ==========================================
     // SUCCESSFUL SUBMISSION
     // ==========================================
-    // 1. Display success message at top of Contact section
     showContactStatus("success", "Thank you. We've received your request and will get back to you shortly.");
 
-    // 2. Clear form fields ONLY after confirmed success
+    // Clear form fields ONLY after confirmed success
     form.reset();
 
-    // 3. Reset Turnstile widget
+    // Reset Turnstile widget
     if (window.turnstile) {
       try {
         window.turnstile.reset();
@@ -460,11 +465,9 @@ form?.addEventListener("submit", async (event) => {
     // ==========================================
     console.error("Form submission failed:", error);
 
-    // 1. Display failure message at top of Contact section
     showContactStatus("error", "We couldn't submit your request right now. Please try again or contact us at hello@nextgenworkflow.co.");
 
-    // 2. IMPORTANT: DO NOT clear the form. PRESERVE all user-entered data so they can retry.
-    // 3. Reset Turnstile widget to allow re-verification if token was consumed
+    // PRESERVE all user-entered data so they can retry without losing input.
     if (window.turnstile) {
       try {
         window.turnstile.reset();
